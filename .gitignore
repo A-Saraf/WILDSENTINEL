@@ -1,0 +1,46 @@
+# -------------------------------
+# Python / Flask / ML .gitignore
+# -------------------------------
+
+# Virtual environments
+env/
+venv/
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Packaging
+*.egg-info/
+build/
+dist/
+
+# Logs
+*.log
+
+# IDE / Editor junk
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Model files (OPTIONAL — leave commented if using LFS)
+#*.joblib
+#*.pkl
+
+# Data cache (OPTIONAL)
+*.sqlite3
+
+*.joblib
+*.pkl
+*.model
+*.bin
+*.sav
+

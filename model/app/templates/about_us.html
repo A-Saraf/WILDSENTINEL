@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+  <div class="text-center mb-3">
+    <h1 class="display-4 fw-bold text-gradient">About Us</h1>
+    <!-- <p class="lead">Welcome to <strong>RiverScout</strong> – your intelligent river health monitoring companion.</p> -->
+  </div>
+
+  <div class="mb-4 px-2" style="text-align: center;">
+    <p><strong>WildSentinel</strong> is an intelligent platform that uses ecological data, machine learning, and geospatial analysis to predict zoonotic spillover risks. By bringing together wildlife trade patterns, habitat loss trends, and disease history, we provide an early-warning system that helps protect both human health and biodiversity. Our goal is to make science-driven insights accessible, actionable, and impactful.</p>
+  </div>
+
+  <hr class="my-5" />
+
+  <h3 class="mt-5 text-gradient">Key Features</h3>
+  <ul class="list-unstyled mt-3 ms-3">
+    <li class="mb-2">🌐 <strong>Data Engine:</strong> Combines wildlife trade, habitat loss, species distribution, and outbreak datasets.</li>
+    <li class="mb-2">🤖 <strong>AI-Driven Risk Modeling:</strong> Predicts zoonotic spillover probabilities using advanced machine-learning algorithms.</li>
+    <li class="mb-2">🗺️ <strong>Geospatial Hotspot Mapping:</strong> Visualizes high-risk zones through interactive heatmaps and GIS layers.</li>
+    <li class="mb-2">🔄 <strong>Scenario Simulation:</strong> Tests how interventions—like reducing trade or restoring habitats—can lower spillover risk.</li>
+    <li class="mb-2">📊 <strong>Insightful Dashboard:</strong> Presents analytics, charts, and maps in a clean, user-friendly interface.</li>
+  </ul>
+
+  <hr class="my-5" />
+
+  <h3 class="mt-5 text-gradient">Our Vision</h3>
+  <p class="mt-3">We envision a world where technology strengthens the harmony between humans and nature. WildSentinel aims to empower communities and decision-makers with predictive insights that prevent outbreaks, preserve ecosystems, and promote a safer, healthier future for all.</p>
+
+  <hr class="my-5" />
+
+  <h3 class="mt-5 text-gradient">Our Team - Cold-Blooded</h3>
+  <p class="mb-4">We are a team of 2nd year engineering students from RV College of Engineering. We are passionate technologists and environmental advocates working on innovative solution to use the tech for Health and Humanity</p>
+
+  <div class="row mt-4">
+    {% for member in [
+      {'name': 'Gopal Bansal', 'branch': 'Industrial Engineering and Management', 'email': 'gopalbansal.im24@rvce.edu.in'},
+      {'name': 'Avyav Saraf', 'branch': 'Information Science and Engineering', 'email': 'avyavsaraf.is24@rvce.edu.in'},
+      {'name': 'Amogh S', 'branch': 'Information Science and Engineering', 'email': 'amoghs.is24@rvce.edu.in'},
+      {'name': 'Namitha G', 'branch': 'Industrial Engineering and Management', 'email': 'namithag.im24@rvce.edu.in'}
+    ] %}
+    <div class="col-md-6 col-lg-3 mb-4">
+      <div class="card team-card h-100 shadow-lg">
+        <div class="card-body text-center">
+          <h5 class="card-title text-primary fw-bold">{{ member.name }}</h5>
+          <p class="card-text">{{ member.branch }}</p>
+          <p class="card-text"><a href="mailto:{{ member.email }}">{{ member.name }} - Email</a></p>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <footer class="footer mt-5 py-4 border-top bg-light">
+    <div class="text-center small text-muted">
+      Made by <strong>Team Code-Blooded</strong>
+    </div>
+  </footer>
+</div>
+
+<!-- Custom Styling -->
+<style>
+  body {
+    background: linear-gradient(to bottom right, #e0f7fa, #f0fdfa);
+  }
+
+  .text-gradient {
+    background: linear-gradient(45deg, #005379, #00374d);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .team-card {
+    border: none;
+    border-radius: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-color: #ffffff;
+  }
+
+  .team-card:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  }
+
+  .team-card .card-title {
+    color: #00695c;
+  }
+
+  .team-card .card-text a {
+    color: #00796b;
+    text-decoration: none;
+  }
+
+  .team-card .card-text a:hover {
+    text-decoration: underline;
+  }
+</style>
+{% endblock %}

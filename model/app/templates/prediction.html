@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- ============================ -->
+<!--  LOAD LEAFLET FIRST (REQUIRED) -->
+<!-- ============================ -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+
+<div class="container mt-4">
+
+    <h2 class="mb-4 fw-bold text-cyan-600">🧪 WildSentinel – Policy Scenario Prediction</h2>
+
+    <div class="row">
+        <div class="col-md-3">
+
+            <!-- FORM PANEL -->
+            <form id="policy-form" onsubmit="event.preventDefault(); runPrediction();">
+
+                <!-- Country DROPDOWN -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Select Country</label>
+                    <select name="country" class="form-select" required>
+                        <option value="">-- Select Country --</option>
+                        {% for c in countries %}
+                            <option value="{{ c }}">{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Sliders -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">🌳 Forest Change (%)</label>
+                    <input type="range" class="form-range" min="-100" max="200" value="0" step="1"
+                           name="forest_pct" id="forest_pct_slider">
+                    <span id="forest_pct_value">0%</span>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">🏙️ Urban Change (%)</label>
+                    <input type="range" class="form-range" min="-100" max="200" value="0" step="1"
+                           name="urban_pct" id="urban_pct_slider">
+                    <span id="urban_pct_value">0%</span>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">📦 Import Change (%)</label>
+                    <input type="range" class="form-range" min="-100" max="500" value="0" step="1"
+                           name="import_pct" id="import_pct_slider">
+                    <span id="import_pct_value">0%</span>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">🚚 Export Change (%)</label>
+                    <input type="range" class="form-range" min="-100" max="500" value="0" step="1"
+                           name="export_pct" id="export_pct_slider">
+                    <span id="export_pct_value">0%</span>
+                </div>
+
+                <button class="btn btn-primary w-100 mt-2" type="submit">Run Prediction</button>
+            </form>
+        </div>
+
+        <!-- MAP AREA -->
+        <div class="col-md-9">
+            <div id="map-container" style="height: 80vh; border-radius: 12px; box-shadow: 0 4px 12px;"></div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ============================ -->
+<!--      SLIDER LABEL UPDATES    -->
+<!-- ============================ -->
+<script>
+document.getElementById("forest_pct_slider").oninput = function () {
+    document.getElementById("forest_pct_value").innerText = this.value + "%";
+};
+document.getElementById("urban_pct_slider").oninput = function () {
+    document.getElementById("urban_pct_value").innerText = this.value + "%";
+};
+document.getElementById("import_pct_slider").oninput = function () {
+    document.getElementById("import_pct_value").innerText = this.value + "%";
+};
+document.getElementById("export_pct_slider").oninput = function () {
+    document.getElementById("export_pct_value").innerText = this.value + "%";
+};
+</script>
+
+<!-- ============================ -->
+<!--         MAP + HEATMAP        -->
+<!-- ============================ -->
+<script>
+
+// --------------- CREATE MAP -----------------
+let map = L.map("map-container").setView([20, 0], 2);
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
+    .addTo(map);
+
+let heatLayer = null;
+
+
+// --------------- CALL BACKEND -----------------
+async function runPrediction() {
+
+    const form = document.getElementById("policy-form");
+    const formData = new FormData(form);
+
+    const btn = form.querySelector("button[type='submit']");
+    btn.disabled = true;
+    btn.innerText = "Running...";
+
+    try {
+        const response = await fetch("/predict_policy", {
+            method: "POST",
+            body: formData
+        });
+
+        if (!response.ok) {
+            let err = await response.text();
+            alert("Server error: " + err);
+            btn.disabled = false;
+            btn.innerText = "Run Prediction";
+            return;
+        }
+
+        const points = await response.json();
+
+        if (!Array.isArray(points) || points.length === 0) {
+            alert("No prediction points returned.");
+            btn.disabled = false;
+            btn.innerText = "Run Prediction";
+            return;
+        }
+
+        drawHeatmap(points);
+
+    } catch (err) {
+        alert("Prediction error: " + err);
+    }
+
+    btn.disabled = false;
+    btn.innerText = "Run Prediction";
+}
+
+
+// --------------- DRAW HEATMAP -----------------
+function drawHeatmap(points) {
+
+    if (heatLayer) {
+        map.removeLayer(heatLayer);
+    }
+
+    const heatData = points.map(p => [
+        parseFloat(p.lat),
+        parseFloat(p.lon),
+        parseFloat(p.prob*3)
+    ]);
+
+    heatLayer = L.heatLayer(heatData, {
+        radius: 25,
+        blur: 15,
+        maxZoom: 12,
+        max: 1.0
+    }).addTo(map);
+
+    // Auto-zoom to country
+    const avgLat = heatData.reduce((a, b) => a + b[0], 0) / heatData.length;
+    const avgLon = heatData.reduce((a, b) => a + b[1], 0) / heatData.length;
+
+    map.setView([avgLat, avgLon], 5);
+}
+
+</script>
+
+{% endblock %}

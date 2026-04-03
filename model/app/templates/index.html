@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WildSentinal | Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+    <style>
+      .bg-primary { background-color: #54a7d0; }
+      .bg-primary-50 { background-color: #daf0fb; }
+      .text-primary-light { color: #ffffff; }
+
+      .tile {
+        background-color: #ffffff;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        text-align: center;
+        transition: background-color 0.3s, transform 0.3s;
+      }
+      .tile:hover {
+        background-color: #e0ebf2;
+        transform: translateY(-5px);
+      }
+      .tile-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #5d85b7;
+      }
+      .tile-desc {
+        color: #666666;
+      }
+    </style>
+</head>
+
+<body class="bg-primary-50 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-primary text-white py-6 shadow-md relative">
+        <div class="container mx-auto px-6 flex justify-center relative">
+            <div class="text-center">
+                <h1 class="text-3xl font-bold">WildSentinal: Safeguarding the Human-Wildlife Interface</h1>
+                <p class="text-primary-light mt-1">Modelling Zoonotic Spillover Risks from Wildlife Trade and Habitat Loss</p>
+            </div>
+            <div class="absolute right-6 top-1/2 transform -translate-y-1/2">
+                <img src="\static\rvlogoB.png" alt="Logo" style="height: 55px;">
+            </div>
+        </div>
+    </header>
+
+    <!-- Main content (centered vertically) -->
+    <main class="flex-grow flex flex-col items-center justify-center p-8">
+
+        <!-- Tiles -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl mt-8">
+            <a href="/dashboard" class="tile">
+                <h2 class="tile-title">Dashboard</h2>
+                <p class="tile-desc">Visualize the spillover of various zoonotic diseases over the specified regions.</p>
+            </a>
+            <a href="/risk" class="tile">
+                <h2 class="tile-title">Risk Prediction</h2>
+                <p class="tile-desc">Predict the future spillover cases and analyze the results under various parameters.</p>
+            </a>
+            <a href="/about" class="tile">
+                <h2 class="tile-title">About Us</h2>
+                <p class="tile-desc">Learn more about WildSentinal and our mission.</p>
+            </a>
+        </div>
+
+    </main>
+
+    <!-- Footer (always at bottom) -->
+    <footer class="text-center text-gray-600 py-4">
+        Made by <strong>Team Code-Blooded</strong>
+    </footer>
+
+</body>
+</html>

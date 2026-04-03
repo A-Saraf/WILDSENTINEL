@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>🗺️ Regional Spillover Risk Map</h2>
+
+<div class="row g-4">
+    <div class="col-md-9">
+        <div id="map-container" style="height: 75vh; border-radius: 12px; box-shadow: 0 4px 12px;"></div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title fw-bold text-cyan-600">Map Controls</h5>
+                <p class="card-text text-muted small">Click a country to view its risk.</p>
+                <hr>
+                <h5 class="card-title fw-bold text-cyan-600">Selected Country</h5>
+                <p id="selected-country-display" class="lead fw-bold text-gray-700">None Selected</p>
+                <hr>
+                <h5 class="card-title fw-bold text-cyan-600">Select Year</h5>
+                <input id="year-slider" type="range" min="2010" max="2024" value="2020" step="1" class="form-range">
+                <p class="mt-2 fw-bold">Year: <span id="year-label">2020</span></p>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+<script src="https://unpkg.com/leaflet-geojson-mask"></script>
+
+<script>
+let map, geoJsonLayer, heatLayer = null, csvData = [];
+let activeMaskLayer = null;
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    map = L.map("map-container").setView([20, 100], 4);
+
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
+        maxZoom: 18
+    }).addTo(map);
+
+    // Load GeoJSON
+    fetch("{{ url_for('static', filename='data/country_boundary.geojson') }}")
+        .then(res => res.json())
+        .then(data => {
+            geoJsonLayer = L.geoJSON(data, {
+                style: {
+                    fillColor: "#99e6ee",
+                    color: "#0e7490",
+                    weight: 2,
+                    fillOpacity: 0.4
+                },
+                onEachFeature: (feature, layer) => {
+                    layer.on("click", e => {
+                        const name = feature.properties.name;
+                        document.getElementById("selected-country-display").innerText = name;
+
+                        applyMask(feature);  // 🟢 Mask only this selected country
+
+                        updateHeatmap(parseInt(document.getElementById("year-slider").value));
+                    });
+                }
+            }).addTo(map);
+        });
+
+    // Load CSV
+    fetch("{{ url_for('static', filename='data/risk_prediction.csv') }}")
+        .then(res => res.text())
+        .then(text => {
+            csvData = parseCSV(text);
+            updateHeatmap(2020);
+        });
+
+    document.getElementById("year-slider").addEventListener("input", e => {
+        document.getElementById("year-label").innerText = e.target.value;
+        updateHeatmap(parseInt(e.target.value));
+    });
+
+    map.on("zoomend", () => {
+        updateHeatmap(parseInt(document.getElementById("year-slider").value));
+    });
+});
+
+// CSV parser
+function parseCSV(text) {
+    const lines = text.trim().split("\n");
+    const out = [];
+
+    for (let i = 1; i < lines.length; i++) {
+        const r = lines[i].split(",");
+        out.push({
+            lat: parseFloat(r[2]),
+            lon: parseFloat(r[3]),
+            year: parseFloat(r[1]),
+            prob: parseFloat(r[4]*12)
+        });
+    }
+    return out;
+}
+
+// 🟢 APPLY MASK USING GEOJSON-INVERSION
+function applyMask(feature) {
+    if (activeMaskLayer) map.removeLayer(activeMaskLayer);
+
+    // Invert the polygon so heatmap only shows inside it
+    activeMaskLayer = L.geoJson.mask(feature).addTo(map);
+}
+
+// Heatmap update
+function updateHeatmap(year) {
+    if (heatLayer) map.removeLayer(heatLayer);
+
+    const filtered = csvData.filter(d => d.year === year);
+
+    const pts = filtered.map(d => [d.lat, d.lon, d.prob]);
+
+    let zoom = map.getZoom();
+    let radius = 35 * (zoom / 5);
+    if (radius < 6) radius = 6;
+    if (radius > 35) radius = 35;
+
+    heatLayer = L.heatLayer(pts, {
+        radius: radius,
+        blur: radius * 0.6,
+        maxZoom: 10
+    }).addTo(map);
+}
+</script>
+
+{% endblock %}
